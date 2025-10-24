@@ -1,9 +1,11 @@
 import { Provider as PaperProvider } from 'react-native-paper';
+import AppNavigator from './src/navigation/AppNavigator';
+
 
 export default function App() {
   return (
     <PaperProvider>
-      {/* Aqui vais chamar o teu componente de navegação principal */}
+      <AppNavigator />
     </PaperProvider>
   );
 }
