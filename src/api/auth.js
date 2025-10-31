@@ -17,16 +17,29 @@ export const login = async (username, password) => {
 
     const response = await api.post('/login.php', data);
 
-    // Verifica se o backend retornou erro na resposta
     if (response.data?.errors === true || response.data?.type === 3) {
-      // “type: 3” e “errors: true” indicam erro de autenticação
       throw new Error(response.data?.message || 'Credenciais inválidas');
     }
 
-    // Qualquer outra resposta 200 é considerada sucesso
     return response.data;
   } catch (error) {
     console.error('Erro no login:', error);
     throw new Error('Login inválido — verifique as credenciais.');
+  }
+};
+
+export const logout = async () => {
+  try {
+    const response = await api.post('/logout.php');
+
+    if (response.data?.data?.result !== true) {
+      throw new Error('Logout falhou');
+    }
+
+    // Se guardares tokens/session, apaga aqui (ex: AsyncStorage.removeItem('token'))
+    return response.data;
+  } catch (error) {
+    console.error('Erro no logout:', error);
+    throw new Error('Erro a terminar sessão');
   }
 };

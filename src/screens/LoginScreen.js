@@ -1,4 +1,5 @@
 import { useNavigation } from '@react-navigation/native';
+import * as WebBrowser from 'expo-web-browser'; // necessário para abrir site externo
 import { useState } from 'react';
 import { KeyboardAvoidingView, StyleSheet, View } from 'react-native';
 import { ActivityIndicator, Button, Text, TextInput, useTheme } from 'react-native-paper';
@@ -19,8 +20,6 @@ export default function LoginScreen() {
     try {
       const result = await login(username, password);
       console.log('Login bem-sucedido!', result);
-
-      // Depois do login, navega para o ecrã principal
       navigation.replace('Home');
     } catch (err) {
       if (err?.errors && Array.isArray(err.errors)) {
@@ -31,6 +30,10 @@ export default function LoginScreen() {
       console.log(err);
     }
     setLoading(false);
+  };
+
+  const handleRegister = () => {
+    WebBrowser.openBrowserAsync('https://www.gesfaturacao.pt/planos.php');
   };
 
   return (
@@ -72,6 +75,15 @@ export default function LoginScreen() {
         {loading ? <ActivityIndicator color="#fff" /> : 'Entrar'}
       </Button>
 
+      {/* Botão de registo abaixo */}
+      <Button
+        mode="text"
+        style={styles.registerButton}
+        onPress={handleRegister}
+      >
+        Registar nova conta
+      </Button>
+
       <Text style={styles.footerText}>Esqueceu a senha?</Text>
     </KeyboardAvoidingView>
   );
@@ -99,6 +111,9 @@ const styles = StyleSheet.create({
   button: {
     marginTop: 10,
     paddingVertical: 4,
+  },
+  registerButton: {
+    marginTop: 14,
   },
   footerText: {
     textAlign: 'center',
