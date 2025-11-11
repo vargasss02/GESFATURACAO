@@ -1,45 +1,54 @@
-import axios from 'axios';
+// src/api/auth.js
 import qs from 'qs';
+import { api, setToken } from './api';
 
-const api = axios.create({
-  baseURL: 'https://demo.gesfaturacao.pt/server',
-  headers: {
-    'Content-Type': 'application/x-www-form-urlencoded',
-  },
-});
-
-export const login = async (username, password) => {
+// 🔐 Login e guardar token
+export async function login(username, password) {
   try {
-    const data = qs.stringify({
-      username,
-      password,
+    const body = qs.stringify({ username, password });
+    const { data } = await api.post('/login', body, {
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     });
 
-    const response = await api.post('/login.php', data);
+    const token = data?._token || data?.token;
+    if (!token) throw new Error('Token não encontrado na resposta.');
 
-    if (response.data?.errors === true || response.data?.type === 3) {
-      throw new Error(response.data?.message || 'Credenciais inválidas');
-    }
-
-    return response.data;
-  } catch (error) {
-    console.error('Erro no login:', error);
-    throw new Error('Login inválido — verifique as credenciais.');
+    await setToken(token);   // guarda memória + AsyncStorage
+    return token;
+  } catch (err) {
+    const msg =
+      err?.response?.data?.errors?.map?.((e) => e.message).join('\n') ||
+      err?.response?.data?.message ||
+      err?.message ||
+      'Erro no login';
+    throw new Error(msg);
   }
-};
+}
 
-export const logout = async () => {
+// ✅ validar token (a API espera Authorization: <token cru>)
+export async function validateToken(token) {
   try {
-    const response = await api.post('/logout.php');
-
-    if (response.data?.data?.result !== true) {
-      throw new Error('Logout falhou');
-    }
-
-    // Se guardares tokens/session, apaga aqui (ex: AsyncStorage.removeItem('token'))
-    return response.data;
-  } catch (error) {
-    console.error('Erro no logout:', error);
-    throw new Error('Erro a terminar sessão');
+    const { data } = await api.post(
+      '/validate-token',
+      {},
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: token, // **sem Bearer**
+        },
+      }
+    );
+    return data; // { _token: "..." }
+  } catch (err) {
+    const msg =
+      err?.response?.data?.errors?.message ||
+      err?.response?.data?.message ||
+      'Token inválido';
+    throw new Error(msg);
   }
-};
+}
+
+// 🚪 logout
+export async function logout() {
+  await setToken(null);
+}

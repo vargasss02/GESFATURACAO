@@ -1,16 +1,17 @@
+// src/screens/LoginScreen.jsx
 import { useNavigation } from '@react-navigation/native';
-import * as WebBrowser from 'expo-web-browser'; // necessário para abrir site externo
+import * as WebBrowser from 'expo-web-browser';
 import { useState } from 'react';
 import { KeyboardAvoidingView, StyleSheet, View } from 'react-native';
 import { ActivityIndicator, Button, Text, TextInput, useTheme } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { login } from '../api/auth';
+import { login, validateToken } from '../api/auth';
 
 export default function LoginScreen() {
   const { colors } = useTheme();
   const navigation = useNavigation();
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('demo');
+  const [password, setPassword] = useState('demo');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -18,18 +19,15 @@ export default function LoginScreen() {
     setLoading(true);
     setError('');
     try {
-      const result = await login(username, password);
-      console.log('Login bem-sucedido!', result);
-      navigation.replace('Home');
+      const token = await login(username, password); // guarda token internamente
+      await validateToken(token);                     // valida já
+      navigation.replace('Home');                    // segue
     } catch (err) {
-      if (err?.errors && Array.isArray(err.errors)) {
-        setError(err.errors.map(e => e.message).join('\n'));
-      } else {
-        setError(err.message || 'Login inválido');
-      }
-      console.log(err);
+      setError(err?.message || 'Login inválido');
+      console.log('Login error:', err);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleRegister = () => {
@@ -54,7 +52,6 @@ export default function LoginScreen() {
         style={styles.input}
         autoCapitalize="none"
       />
-
       <TextInput
         label="Password"
         value={password}
@@ -66,21 +63,11 @@ export default function LoginScreen() {
 
       {error ? <Text style={styles.error}>{error}</Text> : null}
 
-      <Button
-        mode="contained"
-        style={styles.button}
-        onPress={handleLogin}
-        disabled={loading || !username || !password}
-      >
+      <Button mode="contained" style={styles.button} onPress={handleLogin} disabled={loading || !username || !password}>
         {loading ? <ActivityIndicator color="#fff" /> : 'Entrar'}
       </Button>
 
-      {/* Botão de registo abaixo */}
-      <Button
-        mode="text"
-        style={styles.registerButton}
-        onPress={handleRegister}
-      >
+      <Button mode="text" style={styles.registerButton} onPress={handleRegister}>
         Registar nova conta
       </Button>
 
@@ -90,39 +77,12 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    padding: 25,
-    backgroundColor: '#f4f7fa',
-  },
-  logoContainer: {
-    alignItems: 'center',
-    marginBottom: 40,
-  },
-  title: {
-    marginTop: 10,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  input: {
-    marginBottom: 18,
-  },
-  button: {
-    marginTop: 10,
-    paddingVertical: 4,
-  },
-  registerButton: {
-    marginTop: 14,
-  },
-  footerText: {
-    textAlign: 'center',
-    marginTop: 15,
-    color: '#888',
-  },
-  error: {
-    color: 'red',
-    marginBottom: 10,
-    textAlign: 'center',
-  },
+  container: { flex: 1, justifyContent: 'center', padding: 25, backgroundColor: '#f4f7fa' },
+  logoContainer: { alignItems: 'center', marginBottom: 40 },
+  title: { marginTop: 10, fontWeight: 'bold', color: '#333' },
+  input: { marginBottom: 18 },
+  button: { marginTop: 10, paddingVertical: 4 },
+  registerButton: { marginTop: 14 },
+  footerText: { textAlign: 'center', marginTop: 15, color: '#888' },
+  error: { color: 'red', marginBottom: 10, textAlign: 'center' },
 });
