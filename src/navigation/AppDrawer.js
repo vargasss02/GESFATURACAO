@@ -23,20 +23,32 @@ export default function AppDrawer() {
   return (
     <Drawer.Navigator
       drawerContent={(props) => <CustomDrawerContent {...props} />}
-      screenOptions={{ headerShown: false }}
+      screenOptions={{
+        headerShown: false,
+        drawerActiveTintColor: '#E5C79C',
+        drawerInactiveTintColor: '#CBBBA0',
+        drawerStyle: {
+          backgroundColor: '#1B1916',
+          width: 260,
+        },
+        drawerLabelStyle: {
+          fontSize: 15,
+          fontWeight: '500',
+        },
+      }}
       initialRouteName="Dashboard"
     >
       <Drawer.Screen
         name="Dashboard"
         component={DashboardScreen}
-        options={{ drawerLabel: 'Dashboard' }}
+        options={{ drawerLabel: 'Início' }}
       />
 
-      {/* 👉 Orçamentos como Stack (Lista + Detalhe) */}
+      {/* 👉 Stack: Lista + Detalhe (sem conflito de nomes) */}
       <Drawer.Screen
-        name="Orcamentos"                 // <— nome técnico (sem acento)
+        name="Orcamentos"
         component={OrcamentosStack}
-        options={{ drawerLabel: 'Orçamentos' }} // <— label que aparece no menu
+        options={{ drawerLabel: 'Orçamentos' }}
       />
 
       <Drawer.Screen
@@ -96,7 +108,7 @@ export default function AppDrawer() {
       <Drawer.Screen
         name="Definicoes"
         component={DefinicoesScreen}
-        options={{ drawerLabel: 'Definições' }} // label com acento
+        options={{ drawerLabel: 'Definições' }}
       />
     </Drawer.Navigator>
   );

@@ -1,6 +1,6 @@
 // src/api/utils/http.js
 
-// junta params em querystring (ignora null/undefined/'')
+// 🧮 junta params em querystring (ignora null/undefined/'')
 export function buildQuery(params = {}) {
   const usp = new URLSearchParams();
   Object.entries(params).forEach(([k, v]) => {
@@ -11,7 +11,7 @@ export function buildQuery(params = {}) {
   return qs ? `?${qs}` : '';
 }
 
-// normaliza erros vindos da API GESFaturação
+// ⚠️ normaliza erros vindos da API GesFaturação
 export function handleApiError(err, fallback = 'Erro na comunicação com a API') {
   const msg =
     err?.response?.data?.errors?.message ||
@@ -22,6 +22,8 @@ export function handleApiError(err, fallback = 'Erro na comunicação com a API'
     err?.response?.data?.errors?.code ||
     err?.response?.status ||
     'API_ERROR';
+
+  console.error('❌ API Error:', code, msg);
   const e = new Error(msg);
   e.code = code;
   throw e;

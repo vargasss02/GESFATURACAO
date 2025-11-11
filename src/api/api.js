@@ -1,12 +1,19 @@
-// src/api/api.js
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import Constants from 'expo-constants';
 
 let tokenMemory = null;
 let onUnauthorized = null;
 
+const BASE_URL =
+  Constants.expoConfig?.extra?.apiBaseUrl ??
+  Constants.manifest?.extra?.apiBaseUrl ??
+  'https://api.gesfaturacao.pt/api/v1.0.4';
+
+console.log('🌐 API base URL:', BASE_URL);
+
 export const api = axios.create({
-  baseURL: 'https://api.gesfaturacao.pt/api/v1.0.4',
+  baseURL: BASE_URL,
   headers: { Accept: 'application/json' },
 });
 

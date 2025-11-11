@@ -3,13 +3,15 @@ import { api } from './api';
 import { buildQuery, handleApiError } from './utils/http';
 import { mapClient } from './utils/normalizers';
 
-// GET /clients
+// 📄 GET /clients → lista paginada
 export async function listClients({ page = 1, perPage = 20, search = '' } = {}) {
   try {
     const qs = buildQuery({ page, perPage, search });
     const { data } = await api.get(`/clients${qs}`);
+    const items = Array.isArray(data?.data) ? data.data.map(mapClient) : [];
+    console.log(`👥 Clientes recebidos: ${items.length}`);
     return {
-      items: Array.isArray(data?.data) ? data.data.map(mapClient) : [],
+      items,
       pagination: data?.pagination ?? { currentPage: 1, lastPage: 1, total: 0 },
     };
   } catch (err) {
@@ -17,7 +19,7 @@ export async function listClients({ page = 1, perPage = 20, search = '' } = {}) 
   }
 }
 
-// GET /clients/{id}
+// 📄 GET /clients/{id}
 export async function getClientById(id) {
   try {
     const { data } = await api.get(`/clients/${id}`);
@@ -27,10 +29,9 @@ export async function getClientById(id) {
   }
 }
 
-// POST /clients
+// ➕ POST /clients
 export async function createClient(payload) {
   try {
-    // payload esperado típico: { name, vatNumber, email, address, zipCode, city, country }
     const { data } = await api.post('/clients', payload, {
       headers: { 'Content-Type': 'application/json' },
     });
@@ -40,7 +41,7 @@ export async function createClient(payload) {
   }
 }
 
-// PUT /clients/{id}
+// ✏️ PUT /clients/{id}
 export async function updateClient(id, payload) {
   try {
     const { data } = await api.put(`/clients/${id}`, payload, {
@@ -52,7 +53,7 @@ export async function updateClient(id, payload) {
   }
 }
 
-// DELETE /clients/{id}
+// 🗑️ DELETE /clients/{id}
 export async function deleteClient(id) {
   try {
     await api.delete(`/clients/${id}`);

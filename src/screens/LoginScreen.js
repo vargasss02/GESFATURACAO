@@ -1,10 +1,10 @@
-// src/screens/LoginScreen.jsx
 import { useNavigation } from '@react-navigation/native';
 import * as WebBrowser from 'expo-web-browser';
 import { useState } from 'react';
 import { KeyboardAvoidingView, StyleSheet, View } from 'react-native';
 import { ActivityIndicator, Button, Text, TextInput, useTheme } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { setToken } from '../api/api'; // 👈 importante: guardar token
 import { login, validateToken } from '../api/auth';
 
 export default function LoginScreen() {
@@ -19,12 +19,19 @@ export default function LoginScreen() {
     setLoading(true);
     setError('');
     try {
-      const token = await login(username, password); // guarda token internamente
-      await validateToken(token);                     // valida já
-      navigation.replace('Home');                    // segue
+      const token = await login(username, password);
+
+      // 🔐 Guardar token no AsyncStorage (memória local)
+      await setToken(token);
+
+      // ✅ Validar o token logo a seguir
+      await validateToken(token);
+
+      // 👉 Seguir para o Drawer principal
+      navigation.replace('Home');
     } catch (err) {
+      console.error('Login error:', err);
       setError(err?.message || 'Login inválido');
-      console.log('Login error:', err);
     } finally {
       setLoading(false);
     }
@@ -63,7 +70,12 @@ export default function LoginScreen() {
 
       {error ? <Text style={styles.error}>{error}</Text> : null}
 
-      <Button mode="contained" style={styles.button} onPress={handleLogin} disabled={loading || !username || !password}>
+      <Button
+        mode="contained"
+        style={styles.button}
+        onPress={handleLogin}
+        disabled={loading || !username || !password}
+      >
         {loading ? <ActivityIndicator color="#fff" /> : 'Entrar'}
       </Button>
 
