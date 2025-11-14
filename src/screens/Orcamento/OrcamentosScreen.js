@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+
 import { loadToken } from '../../api/api';
 import { listBudgets } from '../../api/budgets';
 import { fmtDate, fmtMoney } from '../../api/utils/format';
@@ -19,11 +20,6 @@ export default function OrcamentosScreen() {
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState('');
-
-  const handleBack = () => {
-    if (nav.canGoBack()) nav.goBack();
-    else nav.navigate('Dashboard');
-  };
 
   useEffect(() => {
     (async () => {
@@ -39,7 +35,7 @@ export default function OrcamentosScreen() {
         setErro('');
       } catch (e) {
         console.error('❌ Erro em OrcamentosScreen:', e);
-        setErro(e?.message || 'Falha ao carregar orçamentos');
+        setErro(e?.message || 'Erro ao carregar orçamentos');
       } finally {
         setLoading(false);
       }
@@ -89,11 +85,6 @@ export default function OrcamentosScreen() {
 
   return (
     <View style={s.container}>
-      <TouchableOpacity onPress={handleBack} style={s.backBtn}>
-        <Text style={s.backTxt}>← Voltar</Text>
-      </TouchableOpacity>
-
-      <Text style={s.title}>Orçamentos</Text>
       <FlatList
         data={items}
         keyExtractor={(it, i) => it.id || String(i)}
@@ -110,16 +101,29 @@ export default function OrcamentosScreen() {
 }
 
 const s = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: '#0f0e0c' },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#0f0e0c' },
-  backBtn: { marginBottom: 10 },
-  backTxt: { color: '#7ee081', fontWeight: '700', fontSize: 16 },
-  title: { color: '#f5e6d3', fontWeight: '700', fontSize: 22, marginBottom: 12 },
-  card: { backgroundColor: '#1b1916', padding: 12, borderRadius: 10, marginBottom: 10 },
+  container: { flex: 1, backgroundColor: '#0f0e0c', padding: 16 },
+
+  center: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#0f0e0c',
+  },
+
+  card: {
+    backgroundColor: '#1b1916',
+    padding: 12,
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+
   top: { flexDirection: 'row', justifyContent: 'space-between' },
+
   topLeft: { color: '#f5e6d3', fontWeight: '700' },
   topRight: { color: '#f5e6d3', fontWeight: '700' },
+
   line: { color: '#cfc6bb', marginTop: 2 },
   val: { color: '#eee', fontWeight: '600' },
+
   badge: { color: '#7ee081', fontWeight: '700' },
 });

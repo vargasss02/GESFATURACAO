@@ -24,7 +24,7 @@ export default function AppDrawer() {
     <Drawer.Navigator
       drawerContent={(props) => <CustomDrawerContent {...props} />}
       screenOptions={{
-        headerShown: false,
+        headerShown: false, // drawer NÃO mostra header
         drawerActiveTintColor: '#E5C79C',
         drawerInactiveTintColor: '#CBBBA0',
         drawerStyle: {
@@ -44,7 +44,7 @@ export default function AppDrawer() {
         options={{ drawerLabel: 'Início' }}
       />
 
-      {/* 👉 Stack: Lista + Detalhe (sem conflito de nomes) */}
+      {/* 👉 A Stack TEM header próprio */}
       <Drawer.Screen
         name="Orcamentos"
         component={OrcamentosStack}
