@@ -1,64 +1,60 @@
 // src/api/clients.js
-import { api } from './api';
-import { buildQuery, handleApiError } from './utils/http';
-import { mapClient } from './utils/normalizers';
+import { api, loadToken } from "./api";
 
-// 📄 GET /clients → lista paginada
-export async function listClients({ page = 1, perPage = 20, search = '' } = {}) {
-  try {
-    const qs = buildQuery({ page, perPage, search });
-    const { data } = await api.get(`/clients${qs}`);
-    const items = Array.isArray(data?.data) ? data.data.map(mapClient) : [];
-    console.log(`👥 Clientes recebidos: ${items.length}`);
-    return {
-      items,
-      pagination: data?.pagination ?? { currentPage: 1, lastPage: 1, total: 0 },
-    };
-  } catch (err) {
-    handleApiError(err, 'Erro ao obter clientes');
-  }
-}
+/**
+ * Create client
+ * POST /clients
+ * The API example expects application/x-www-form-urlencoded
+ */
+export async function createClient(payload = {}) {
+  const token = await loadToken();
 
-// 📄 GET /clients/{id}
-export async function getClientById(id) {
-  try {
-    const { data } = await api.get(`/clients/${id}`);
-    return mapClient(data);
-  } catch (err) {
-    handleApiError(err, 'Erro ao obter cliente');
-  }
-}
+  // Convert to URLSearchParams to match application/x-www-form-urlencoded
+  const body = new URLSearchParams();
+  Object.keys(payload).forEach((k) => {
+    // only append non-null/undefined values
+    const val = payload[k];
+    if (val !== undefined && val !== null) body.append(k, String(val));
+  });
 
-// ➕ POST /clients
-export async function createClient(payload) {
   try {
-    const { data } = await api.post('/clients', payload, {
-      headers: { 'Content-Type': 'application/json' },
+    const res = await api.post("/clients", body.toString(), {
+      headers: {
+        Authorization: token,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
     });
-    return mapClient(data);
+
+    console.log("🟢 Cliente criado:", res.data);
+    return res.data;
   } catch (err) {
-    handleApiError(err, 'Erro ao criar cliente');
+    console.error("❌ Erro ao criar cliente:", err.response?.data || err);
+    // rethrow an Error with a friendly message, but keep server info on console
+    const server = err.response?.data;
+    const msg =
+      server?.errors?.message ||
+      server?.message ||
+      server?.error ||
+      "Erro ao criar cliente";
+    throw new Error(msg);
   }
 }
 
-// ✏️ PUT /clients/{id}
-export async function updateClient(id, payload) {
+/**
+ * Get next internal code
+ * GET /clients/code
+ */
+export async function getNextClientCode() {
+  const token = await loadToken();
   try {
-    const { data } = await api.put(`/clients/${id}`, payload, {
-      headers: { 'Content-Type': 'application/json' },
+    const res = await api.get("/clients/code", {
+      headers: { Authorization: token },
     });
-    return mapClient(data);
+    console.log("📌 Next client code:", res.data);
+    // API may return number or object — return raw data for caller to handle
+    return res.data;
   } catch (err) {
-    handleApiError(err, 'Erro ao atualizar cliente');
-  }
-}
-
-// 🗑️ DELETE /clients/{id}
-export async function deleteClient(id) {
-  try {
-    await api.delete(`/clients/${id}`);
-    return true;
-  } catch (err) {
-    handleApiError(err, 'Erro ao eliminar cliente');
+    console.error("❌ Erro ao obter código interno:", err.response?.data || err);
+    return null;
   }
 }

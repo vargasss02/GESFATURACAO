@@ -7,6 +7,7 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
+
       {/* Botão para abrir o Drawer */}
       <TouchableOpacity
         onPress={() => navigation.openDrawer()}
@@ -14,7 +15,19 @@ export default function HomeScreen() {
       >
         <Icon name="menu" size={36} color="#222" />
       </TouchableOpacity>
+
       <Text style={styles.text}>Login efetuado com sucesso!</Text>
+
+      {/* 🔥 Botão NOVA FATURA */}
+      <TouchableOpacity
+        style={styles.newInvoiceBtn}
+        onPress={() =>
+          navigation.navigate("Faturas", { screen: "CriarFatura" })
+        }
+      >
+        <Text style={styles.newInvoiceTxt}>+ Criar Nova Fatura</Text>
+      </TouchableOpacity>
+
     </View>
   );
 }
@@ -26,6 +39,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: '#E6F0FF',
   },
+
   text: {
     fontSize: 22,
     fontWeight: 'bold',
@@ -33,6 +47,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 30,
   },
+
   menuButton: {
     position: 'absolute',
     left: 24,
@@ -41,5 +56,21 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     padding: 8,
     borderRadius: 24,
+  },
+
+  /* 🔥 Novo botão */
+  newInvoiceBtn: {
+    marginTop: 30,
+    backgroundColor: "#7ee081",
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    borderRadius: 10,
+    elevation: 3,
+  },
+
+  newInvoiceTxt: {
+    color: "#000",
+    fontWeight: "700",
+    fontSize: 18,
   },
 });
