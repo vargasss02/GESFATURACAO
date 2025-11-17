@@ -1,3 +1,4 @@
+// src/api/api.js
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import Constants from 'expo-constants';
@@ -5,6 +6,7 @@ import Constants from 'expo-constants';
 let tokenMemory = null;
 let onUnauthorized = null;
 
+/** ===== BASE URL ===== */
 const BASE_URL =
   Constants.expoConfig?.extra?.apiBaseUrl ??
   Constants.manifest?.extra?.apiBaseUrl ??
@@ -12,6 +14,14 @@ const BASE_URL =
 
 console.log('🌐 API base URL:', BASE_URL);
 
+// 🔥 Exportar para poderes usar noutras partes
+export const API_URL = BASE_URL;
+
+export const API_HEADERS = {
+  Accept: 'application/json',
+};
+
+/** ===== Axios Instance ===== */
 export const api = axios.create({
   baseURL: BASE_URL,
   headers: { Accept: 'application/json' },
@@ -22,6 +32,7 @@ export async function loadToken() {
   if (!tokenMemory) tokenMemory = await AsyncStorage.getItem('token');
   return tokenMemory;
 }
+
 export async function setToken(value) {
   tokenMemory = value || null;
   if (value) {
@@ -30,8 +41,12 @@ export async function setToken(value) {
     await AsyncStorage.removeItem('token');
   }
 }
-export const setAuthToken = setToken; // alias p/ compatibilidade
-export function setOnUnauthorized(cb) { onUnauthorized = cb; }
+
+export const setAuthToken = setToken;
+
+export function setOnUnauthorized(cb) {
+  onUnauthorized = cb;
+}
 
 /** ===== interceptors ===== */
 api.interceptors.request.use(async (config) => {
@@ -39,7 +54,7 @@ api.interceptors.request.use(async (config) => {
   if (t) {
     config.headers = {
       ...(config.headers || {}),
-      Authorization: t,            // **token cru, sem Bearer**
+      Authorization: t, // token simples, sem Bearer
       Accept: 'application/json',
     };
   }
@@ -51,10 +66,12 @@ api.interceptors.response.use(
   async (error) => {
     const status = error?.response?.status;
     const code = error?.response?.data?.errors?.code;
+
     if (status === 401 || code === 'TOKEN_INVALID' || code === 'TOKEN_MISSING') {
       await setToken(null);
       if (typeof onUnauthorized === 'function') onUnauthorized();
     }
+
     return Promise.reject(error);
   }
 );

@@ -1,8 +1,10 @@
-import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
-import LoginScreen from '../screens/LoginScreen';
-import SplashScreen from '../screens/SplashScreen';
-import AppDrawer from './AppDrawer'; // usa o Drawer
+// src/navigation/AppNavigator.js
+import { NavigationContainer } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
+
+import LoginScreen from "../screens/LoginScreen";
+import SplashScreen from "../screens/SplashScreen";
+import AppDrawer from "./AppDrawer";
 
 const Stack = createStackNavigator();
 
@@ -15,7 +17,8 @@ export default function AppNavigator() {
       >
         <Stack.Screen name="Splash" component={SplashScreen} />
         <Stack.Screen name="Login" component={LoginScreen} />
-        {/* A Home agora é o Drawer! */}
+
+        {/* HOME = DRAWER */}
         <Stack.Screen name="Home" component={AppDrawer} />
       </Stack.Navigator>
     </NavigationContainer>

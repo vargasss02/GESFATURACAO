@@ -17,20 +17,28 @@ export default function DashboardScreen() {
       </TouchableOpacity>
 
       {/* Botões principais */}
+
+      {/* Lista de Clientes */}
       <TouchableOpacity
         style={styles.btn}
-        onPress={() => navigation.navigate("ClientesLista")}
+        onPress={() => navigation.navigate("Clientes")}
       >
         <Text style={styles.btnText}>Clientes</Text>
       </TouchableOpacity>
 
+      {/* Criar Cliente */}
       <TouchableOpacity
         style={styles.btn}
-        onPress={() => navigation.navigate("ClienteCriar")}
+        onPress={() =>
+          navigation.navigate("Clientes", {
+            screen: "ClienteCriar",
+          })
+        }
       >
         <Text style={styles.btnText}>Criar Cliente</Text>
       </TouchableOpacity>
 
+      {/* Faturas */}
       <TouchableOpacity
         style={styles.btn}
         onPress={() => navigation.navigate("Faturas")}
@@ -38,6 +46,7 @@ export default function DashboardScreen() {
         <Text style={styles.btnText}>Faturas</Text>
       </TouchableOpacity>
 
+      {/* Guias de Transporte */}
       <TouchableOpacity
         style={styles.btn}
         onPress={() => navigation.navigate("GuiasTransporte")}
@@ -45,6 +54,7 @@ export default function DashboardScreen() {
         <Text style={styles.btnText}>Guias de Transporte</Text>
       </TouchableOpacity>
 
+      {/* Orçamentos */}
       <TouchableOpacity
         style={styles.btn}
         onPress={() => navigation.navigate("Orcamentos")}

@@ -1,15 +1,11 @@
-// src/api/utils/normalizers.js
-
 /** =========================
  *  LISTA DE ORÇAMENTOS
- *  (GET /budgets)
  *  ========================= */
 export const mapBudget = (dto = {}) => ({
   id: String(dto.id ?? ''),
   number: dto.number ?? dto.title ?? `#${dto.id ?? '-'}`,
   date: dto.date ?? null,
   expiration: dto.expiration ?? null,
-  // na lista algumas APIs devolvem 'total'; no detalhe é 'grossTotal'
   total: Number(dto.total ?? dto.grossTotal ?? 0),
   clientName: dto?.client?.name ?? dto?.name ?? '—',
   statusText:
@@ -34,9 +30,7 @@ export const mapClient = (dto = {}) => ({
   countryCode: dto.countryCode ?? '—',
 });
 
-/** =========================
- *  HELPERS
- *  ========================= */
+/** helpers */
 const num = (v, d = 0) => {
   if (v === null || v === undefined || v === '') return d;
   const n = Number(v);
@@ -44,8 +38,7 @@ const num = (v, d = 0) => {
 };
 
 /** =========================
- *  LINHAS DO ORÇAMENTO
- *  (schema /budgets/{id})
+ *  LINHAS
  *  ========================= */
 export const mapBudgetLine = (dto = {}) => ({
   description:
@@ -53,64 +46,56 @@ export const mapBudgetLine = (dto = {}) => ({
     dto.description ??
     dto.designation ??
     '—',
-  quantity: num(dto.quantity, 0),            // vem como string -> número
-  unitPrice: num(dto.price, 0),              // vem como string -> número
+  quantity: num(dto.quantity, 0),
+  unitPrice: num(dto.price, 0),
   percentageDiscount: num(dto.percentageDiscount, 0),
-  taxPercent: num(dto.tax?.value, 0),        // string -> número
-  total: num(dto.total, 0),                  // string -> número
+  taxPercent: num(dto.tax?.value, 0),
+  total: num(dto.total, 0),
 });
 
 /** =========================
  *  DETALHE DO ORÇAMENTO
- *  (GET /budgets/{id})
  *  ========================= */
 export const mapBudgetDetail = (dto = {}) => {
-  // dueDate no swagger aparece como "0" (número) — se não vier ISO, usa expiration
-  const rawDue = dto.dueDate;
-  const dueDate =
-    typeof rawDue === 'string' && rawDue.includes('-')
-      ? rawDue
-      : (dto.expiration ?? null);
-
   return {
-    // base (compatível com a lista)
     id: String(dto.id ?? ''),
     number: String(dto.number ?? dto.title ?? `#${dto.id ?? '-'}`),
-    title: dto.title ?? null,
-    date: dto.date ?? null,
-    expiration: dto.expiration ?? null,
-    dueDate,
 
     // cliente
     client: mapClient(dto.client ?? {}),
 
-    // série e moeda (segundo schema do detalhe)
-    series: dto.serie?.value ?? dto.series ?? '—',
-    currency: dto.coin?.iso ?? dto.coin?.name ?? 'EUR',
-    currencyLabel: dto.coin?.name ?? 'Euro (€)',
+    // série
+    series: dto.serie?.value ?? '—',
 
-    // meta
+    // datas
+    date: dto.date ?? null,
+    expiration: dto.expiration ?? null,
+    dueDate: dto.expiration ?? null,
+
     reference: dto.reference ?? '—',
     observations: dto.observations ?? '',
+
+    // moeda (usa ordem: iso > symbol > name)
+    currency: dto.coin?.iso ?? dto.coin?.symbol ?? dto.coin?.name ?? 'EUR',
+
     discountPercent: num(dto.discount ?? 0),
 
     // estado
     statusId: dto?.status?.id ?? null,
-    statusText:
-      dto?.status?.description ??
-      dto?.status?.name ??
-      '—',
+    statusText: dto?.status?.description ?? '—',
 
     // linhas
-    lines: Array.isArray(dto.lines) ? dto.lines.map(mapBudgetLine) : [],
+    lines: Array.isArray(dto.lines)
+      ? dto.lines.map(mapBudgetLine)
+      : [],
 
-    // totais (nomes do schema do detalhe)
+    // totais corretos conforme API
     subtotals: {
-      subtotalNoVat: num(dto.netTotal ?? 0),       // s/ IVA
-      vat: num(dto.taxPayable ?? 0),               // IVA
-      discounts: 0,                                // não vem desagregado
-      withholding: num(dto.retention ?? 0),        // retenção
-      total: num(dto.grossTotal ?? dto.total ?? 0) // total c/ IVA
+      subtotalNoVat: num(dto.netTotal ?? 0),
+      vat: num(dto.taxPayable ?? 0),
+      discounts: 0,
+      withholding: num(dto.retention ?? 0),
+      total: num(dto.grossTotal ?? dto.total ?? 0),
     },
 
     remaining: num(dto.remaining ?? 0),
