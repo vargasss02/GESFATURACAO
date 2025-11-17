@@ -1,42 +1,35 @@
 // src/navigation/stacks/FaturasStack.js
-import { createStackNavigator } from "@react-navigation/stack";
-import FaturaCriarScreen from "../../screens/Vendas/FaturaCriarScreen";
-import FaturaDetalheScreen from "../../screens/Vendas/FaturaDetalheScreen";
-import FaturasScreen from "../../screens/Vendas/FaturasScreen";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
-const Stack = createStackNavigator();
+import FaturaCriarScreen from "../../screens/Faturas/FaturaCriarScreen";
+import FaturaDetalheScreen from "../../screens/Faturas/FaturaDetalheScreen";
+import FaturasListaScreen from "../../screens/Faturas/FaturasListaScreen";
+
+const Stack = createNativeStackNavigator();
 
 export default function FaturasStack() {
   return (
     <Stack.Navigator
       screenOptions={{
-        headerShown: false, // por padrão escondemos headers para a lista
+        headerShown: false,
       }}
     >
-      <Stack.Screen name="FaturasLista" component={FaturasScreen} />
-
+      {/* LISTA */}
       <Stack.Screen
-        name="FaturaDetalhe"
-        component={FaturaDetalheScreen}
-        options={{
-          headerShown: true,
-          title: "Detalhes da Fatura",
-          headerStyle: { backgroundColor: "#0f0e0c" },
-          headerTintColor: "#7ee081",
-          headerTitleStyle: { fontWeight: "bold" },
-        }}
+        name="FaturasLista"
+        component={FaturasListaScreen}
       />
 
+      {/* CRIAR */}
       <Stack.Screen
         name="FaturaCriar"
         component={FaturaCriarScreen}
-        options={{
-          headerShown: true,
-          title: "Criar Fatura",
-          headerStyle: { backgroundColor: "#0f0e0c" },
-          headerTintColor: "#7ee081",
-          headerTitleStyle: { fontWeight: "bold" },
-        }}
+      />
+
+      {/* DETALHE */}
+      <Stack.Screen
+        name="FaturaDetalhe"
+        component={FaturaDetalheScreen}
       />
     </Stack.Navigator>
   );

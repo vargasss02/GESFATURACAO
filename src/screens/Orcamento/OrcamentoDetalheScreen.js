@@ -9,10 +9,13 @@ import {
   View,
 } from "react-native";
 
-import { changeBudgetStatus, getBudgetById } from "../../api/budgets";
+import {
+  changeBudgetStatus,
+  getBudgetById,
+} from "../../api/budgets";
 import { fmtDate, fmtMoney } from "../../api/utils/format";
 
-export default function OrcamentoDetalheScreen({ route, navigation }) {
+export default function OrcamentoDetalheScreen({ route }) {
   const { id } = route.params || {};
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -34,12 +37,15 @@ export default function OrcamentoDetalheScreen({ route, navigation }) {
     }
   }
 
+  /** =========================
+   * ALTERAR ESTADO
+   * ========================= */
   async function handleStatusChange(action) {
     try {
       const confirm = await new Promise((resolve) => {
         Alert.alert(
-          "Confirmar operação",
-          `Tens a certeza que queres ${action} este orçamento?`,
+          "Confirmar",
+          `Tens a certeza que queres ${action} o orçamento?`,
           [
             { text: "Cancelar", style: "cancel", onPress: () => resolve(false) },
             { text: "OK", onPress: () => resolve(true) },
@@ -62,97 +68,74 @@ export default function OrcamentoDetalheScreen({ route, navigation }) {
     }
   }
 
+  /** =========================
+   * RENDER LINHA
+   * ========================= */
   const LineRow = ({ it }) => (
     <View style={s.lineRow}>
       <Text style={[s.cell, { flex: 2 }]}>{it.description}</Text>
-
       <Text style={[s.cell, { flex: 1, textAlign: "right" }]}>
-        {it.taxPercent.toFixed(0)} %
+        {it.taxPercent.toFixed(2)}%
       </Text>
-
       <Text style={[s.cell, { flex: 1, textAlign: "right" }]}>
         {fmtMoney(it.total)}
       </Text>
     </View>
   );
 
-  if (loading) {
+  /** =========================
+   * LOADING / ERRO
+   * ========================= */
+  if (loading)
     return (
       <View style={s.center}>
         <ActivityIndicator size="large" color="#7ee081" />
-        <Text style={{ marginTop: 8, color: "#fff" }}>A carregar…</Text>
+        <Text style={{ color: "#fff", marginTop: 10 }}>A carregar…</Text>
       </View>
     );
-  }
 
-  if (erro) {
+  if (erro)
     return (
       <View style={s.center}>
         <Text style={{ color: "red" }}>{erro}</Text>
       </View>
     );
-  }
 
-  if (!data) {
+  if (!data)
     return (
       <View style={s.center}>
         <Text style={{ color: "#fff" }}>Sem dados.</Text>
       </View>
     );
-  }
 
+  /** =========================
+   * UI PRINCIPAL
+   * ========================= */
   return (
     <View style={s.container}>
       {/* HEADER */}
       <View style={s.header}>
-        <Text style={s.title}>#{data.number}</Text>
+        <Text style={s.title}># {data.number}</Text>
         <Text style={s.badge}>{data.statusText}</Text>
       </View>
 
       {/* CLIENTE */}
       <View style={s.block}>
         <Text style={s.blockTitle}>Cliente</Text>
-
-        <Text style={s.line}>
-          Nome: <Text style={s.val}>{data.client.name}</Text>
-        </Text>
-
-        <Text style={s.line}>
-          NIF: <Text style={s.val}>{data.client.vatNumber}</Text>
-        </Text>
-
-        <Text style={s.line}>
-          Email: <Text style={s.val}>{data.client.email}</Text>
-        </Text>
+        <Text style={s.line}>Nome: <Text style={s.val}>{data.client.name}</Text></Text>
+        <Text style={s.line}>NIF: <Text style={s.val}>{data.client.vatNumber}</Text></Text>
+        <Text style={s.line}>Email: <Text style={s.val}>{data.client.email}</Text></Text>
       </View>
 
       {/* DADOS DO ORÇAMENTO */}
       <View style={s.block}>
         <Text style={s.blockTitle}>Dados do Orçamento</Text>
-
-        <Text style={s.line}>
-          Série: <Text style={s.val}>{data.series}</Text>
-        </Text>
-
-        <Text style={s.line}>
-          Referência: <Text style={s.val}>{data.reference}</Text>
-        </Text>
-
-        <Text style={s.line}>
-          Data: <Text style={s.val}>{fmtDate(data.date)}</Text>
-        </Text>
-
-        <Text style={s.line}>
-          Vencimento: <Text style={s.val}>{fmtDate(data.dueDate)}</Text>
-        </Text>
-
-        <Text style={s.line}>
-          Moeda: <Text style={s.val}>{data.currency}</Text>
-        </Text>
-
-        <Text style={s.line}>
-          Desconto: <Text style={s.val}>{data.discountPercent}%</Text>
-        </Text>
+        <Text style={s.line}>Série: <Text style={s.val}>{data.series}</Text></Text>
+        <Text style={s.line}>Referência: <Text style={s.val}>{data.reference}</Text></Text>
+        <Text style={s.line}>Data: <Text style={s.val}>{fmtDate(data.date)}</Text></Text>
+        <Text style={s.line}>Vencimento: <Text style={s.val}>{fmtDate(data.dueDate)}</Text></Text>
+        <Text style={s.line}>Moeda: <Text style={s.val}>{data.currency}</Text></Text>
+        <Text style={s.line}>Desconto: <Text style={s.val}>{data.discountPercent}%</Text></Text>
       </View>
 
       {/* LINHAS */}
@@ -172,52 +155,26 @@ export default function OrcamentoDetalheScreen({ route, navigation }) {
           scrollEnabled={false}
         />
 
+        {/* TOTAIS */}
         <View style={s.totals}>
-          <Text style={s.totalLine}>
-            s/IVA:{" "}
-            <Text style={s.val}>
-              {fmtMoney(data.subtotals.subtotalNoVat)}
-            </Text>
-          </Text>
-
-          <Text style={s.totalLine}>
-            IVA: <Text style={s.val}>{fmtMoney(data.subtotals.vat)}</Text>
-          </Text>
-
-          <Text style={s.totalLine}>
-            Retenção:{" "}
-            <Text style={s.val}>{fmtMoney(data.subtotals.withholding)}</Text>
-          </Text>
-
-          <Text style={s.grandTotal}>
-            Total:{" "}
-            <Text style={s.grandTotalVal}>
-              {fmtMoney(data.subtotals.total)}
-            </Text>
-          </Text>
+          <Text style={s.totalLine}>s/IVA: <Text style={s.val}>{fmtMoney(data.subtotals.subtotalNoVat)}</Text></Text>
+          <Text style={s.totalLine}>IVA: <Text style={s.val}>{fmtMoney(data.subtotals.vat)}</Text></Text>
+          <Text style={s.totalLine}>Retenção: <Text style={s.val}>{fmtMoney(data.subtotals.withholding)}</Text></Text>
+          <Text style={s.totalLine}>Total: <Text style={s.grandTotalVal}>{fmtMoney(data.subtotals.total)}</Text></Text>
         </View>
       </View>
 
       {/* BOTÕES */}
       <View style={s.btnRow}>
-        <TouchableOpacity
-          style={s.btn}
-          onPress={() => handleStatusChange("finalize")}
-        >
+        <TouchableOpacity style={s.btn} onPress={() => handleStatusChange("finalize")}>
           <Text style={s.btnTxt}>Finalizar</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={s.btnYellow}
-          onPress={() => handleStatusChange("accept")}
-        >
+        <TouchableOpacity style={s.btnYellow} onPress={() => handleStatusChange("accept")}>
           <Text style={s.btnYellowTxt}>Aceitar</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={s.btnRed}
-          onPress={() => handleStatusChange("refuse")}
-        >
+        <TouchableOpacity style={s.btnRed} onPress={() => handleStatusChange("refuse")}>
           <Text style={s.btnRedTxt}>Recusar</Text>
         </TouchableOpacity>
       </View>
@@ -227,31 +184,14 @@ export default function OrcamentoDetalheScreen({ route, navigation }) {
 
 const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#0f0e0c", padding: 16 },
-
-  center: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#0f0e0c",
-  },
-
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 12,
-  },
-
+  center: { flex: 1, justifyContent: "center", alignItems: "center" },
+  header: { flexDirection: "row", justifyContent: "space-between", marginBottom: 12 },
   title: { fontSize: 22, fontWeight: "800", color: "#f5e6d3" },
   badge: { color: "#7ee081", fontWeight: "700", fontSize: 16 },
 
-  block: {
-    backgroundColor: "#1b1916",
-    padding: 12,
-    borderRadius: 10,
-    marginBottom: 12,
-  },
-
+  block: { backgroundColor: "#1b1916", padding: 12, borderRadius: 10, marginBottom: 12 },
   blockTitle: { color: "#e7d7c3", fontWeight: "700", marginBottom: 6 },
+
   line: { color: "#cfc6bb", marginBottom: 2 },
   val: { color: "#fff", fontWeight: "600" },
 
@@ -262,6 +202,7 @@ const s = StyleSheet.create({
     borderBottomColor: "#2a2621",
     marginBottom: 6,
   },
+
   th: { color: "#e7d7c3", fontWeight: "700" },
 
   lineRow: {
@@ -274,31 +215,13 @@ const s = StyleSheet.create({
   cell: { color: "#ddd" },
 
   totals: { marginTop: 10 },
-
   totalLine: { color: "#cfc6bb", marginTop: 3 },
-
-  grandTotal: {
-    color: "#e7d7c3",
-    fontWeight: "800",
-    marginTop: 6,
-    fontSize: 16,
-  },
 
   grandTotalVal: { color: "#ffcc66", fontWeight: "900" },
 
-  btnRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 10,
-  },
+  btnRow: { flexDirection: "row", justifyContent: "space-between", marginTop: 10 },
 
-  btn: {
-    backgroundColor: "#7ee081",
-    padding: 12,
-    borderRadius: 8,
-    flex: 1,
-    marginRight: 6,
-  },
+  btn: { backgroundColor: "#7ee081", padding: 12, borderRadius: 8, flex: 1, marginRight: 6 },
   btnTxt: { textAlign: "center", color: "#000", fontWeight: "700" },
 
   btnYellow: {
@@ -310,12 +233,6 @@ const s = StyleSheet.create({
   },
   btnYellowTxt: { textAlign: "center", color: "#000", fontWeight: "700" },
 
-  btnRed: {
-    backgroundColor: "#d9534f",
-    padding: 12,
-    borderRadius: 8,
-    flex: 1,
-    marginLeft: 6,
-  },
+  btnRed: { backgroundColor: "#d9534f", padding: 12, borderRadius: 8, flex: 1, marginLeft: 6 },
   btnRedTxt: { textAlign: "center", color: "#fff", fontWeight: "700" },
 });

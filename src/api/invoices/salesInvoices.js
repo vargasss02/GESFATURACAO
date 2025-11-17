@@ -1,25 +1,24 @@
-// src/api/invoices.js
-import { api, loadToken } from "./api";
-import { buildQuery, handleApiError } from "./utils/http";
-import { mapInvoice, mapInvoiceDetail } from "./utils/normalizers";
+// src/api/invoices/salesInvoices.js
+
+import { api, loadToken } from "../api";
+import { buildQuery, handleApiError } from "../utils/http";
+import { mapInvoice, mapInvoiceDetail } from "../utils/normalizers";
 
 /* ========================================================
- * LISTAR INVOICES (SALES)
- * GET /sales/invoices
+ * LISTAR FATURAS (GET /sales/invoices)
  * ====================================================== */
-export async function listInvoices({ page = 1, perPage = 20, search = "" } = {}) {
+export async function listSalesInvoices({ page = 1, perPage = 20, search = "" } = {}) {
   try {
-    const qs = buildQuery({ rows: perPage, page, search });
     const token = await loadToken();
+    const qs = buildQuery({ rows: perPage, page, search });
 
     const { data } = await api.get(`/sales/invoices${qs}`, {
       headers: { Authorization: token },
     });
 
-    // API returns { data: [...], pagination: {...} }
     return {
       items: Array.isArray(data?.data) ? data.data.map(mapInvoice) : [],
-      pagination: data?.pagination ?? { currentPage: 1, lastPage: 1, total: 0 },
+      pagination: data?.pagination ?? {},
     };
   } catch (err) {
     handleApiError(err, "Erro ao obter faturas");
@@ -27,18 +26,19 @@ export async function listInvoices({ page = 1, perPage = 20, search = "" } = {})
 }
 
 /* ========================================================
- * OBTER DETALHE DE UMA INVOICE
- * GET /sales/invoices/{invoice}
+ * DETALHE DA FATURA (GET /sales/invoices/{id})
  * ====================================================== */
-export async function getInvoiceById(id) {
+export async function getSalesInvoiceById(id) {
   try {
     const token = await loadToken();
+
     const { data } = await api.get(`/sales/invoices/${id}`, {
       headers: { Authorization: token },
     });
 
-    // some endpoints wrap data in { data: {...} } — normalizers expect the DTO
+    // A API devolve { data: {...} }
     const dto = data?.data ?? data;
+
     return mapInvoiceDetail(dto);
   } catch (err) {
     handleApiError(err, "Erro ao obter fatura");
@@ -46,24 +46,20 @@ export async function getInvoiceById(id) {
 }
 
 /* ========================================================
- * CRIAR INVOICE (SALES)
- * POST /sales/invoices
- * (application/x-www-form-urlencoded)
+ * CRIAR FATURA (POST /sales/invoices)
+ * Body = x-www-form-urlencoded
  * ====================================================== */
-export async function createInvoice(payload = {}) {
+export async function createSalesInvoice(payload = {}) {
   try {
     const token = await loadToken();
-
     const body = new URLSearchParams();
 
     Object.entries(payload).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
-        if (Array.isArray(value)) {
-          // lines, etc: stringify
-          body.append(key, JSON.stringify(value));
-        } else {
-          body.append(key, String(value));
-        }
+        body.append(
+          key,
+          Array.isArray(value) ? JSON.stringify(value) : String(value)
+        );
       }
     });
 
@@ -74,7 +70,6 @@ export async function createInvoice(payload = {}) {
       },
     });
 
-    // return API created object (data.data or data)
     return res.data?.data ?? res.data;
   } catch (err) {
     handleApiError(err, "Erro ao criar fatura");
@@ -82,19 +77,19 @@ export async function createInvoice(payload = {}) {
 }
 
 /* ========================================================
- * ATUALIZAR INVOICE
- * PUT /sales/invoices/{invoice}
- * (application/x-www-form-urlencoded)
+ * ATUALIZAR FATURA (PUT /sales/invoices/{id})
  * ====================================================== */
-export async function updateInvoice(id, payload = {}) {
+export async function updateSalesInvoice(id, payload = {}) {
   try {
     const token = await loadToken();
-
     const body = new URLSearchParams();
+
     Object.entries(payload).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
-        if (Array.isArray(value)) body.append(key, JSON.stringify(value));
-        else body.append(key, String(value));
+        body.append(
+          key,
+          Array.isArray(value) ? JSON.stringify(value) : String(value)
+        );
       }
     });
 
@@ -105,23 +100,25 @@ export async function updateInvoice(id, payload = {}) {
       },
     });
 
-    // API returns { data: {...} } with updated invoice meta
-    return data?.data ?? data;
+    const dto = data?.data ?? data;
+
+    return mapInvoiceDetail(dto);
   } catch (err) {
     handleApiError(err, "Erro ao atualizar fatura");
   }
 }
 
 /* ========================================================
- * REMOVER INVOICE
- * DELETE /sales/invoices/{invoice}
+ * ELIMINAR FATURA (DELETE /sales/invoices/{id})
  * ====================================================== */
-export async function deleteInvoice(id) {
+export async function deleteSalesInvoice(id) {
   try {
     const token = await loadToken();
+
     await api.delete(`/sales/invoices/${id}`, {
       headers: { Authorization: token },
     });
+
     return true;
   } catch (err) {
     handleApiError(err, "Erro ao eliminar fatura");
@@ -129,11 +126,10 @@ export async function deleteInvoice(id) {
 }
 
 /* ========================================================
- * ALTERAR ESTADO (finalize | void)
- * PATCH /sales/invoices/{invoice}/{action}
- * action: finalize | void
+ * ALTERAR ESTADO (PATCH /sales/invoices/{id}/{action})
+ * action = finalize | void
  * ====================================================== */
-export async function changeInvoiceStatus(id, action) {
+export async function changeSalesInvoiceStatus(id, action) {
   try {
     const token = await loadToken();
 

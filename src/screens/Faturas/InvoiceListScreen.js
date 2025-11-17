@@ -1,5 +1,4 @@
-// src/screens/Vendas/FaturasReciboScreen.js
-
+// src/screens/Faturas/InvoiceListScreen.js
 import { useEffect, useState } from "react";
 import {
     ActivityIndicator,
@@ -11,11 +10,11 @@ import {
     View,
 } from "react-native";
 
-import { listSalesReceipts } from "../../api/receipts/salesReceipts";
+import { listSalesInvoices } from "../../api/invoices/salesInvoices";
 import { fmtDate, fmtMoney } from "../../api/utils/format";
 import DrawerMenuIcon from "../../components/DrawerMenuIcon";
 
-export default function FaturasReciboScreen({ navigation }) {
+export default function InvoiceListScreen({ navigation }) {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const [items, setItems] = useState([]);
@@ -27,10 +26,10 @@ export default function FaturasReciboScreen({ navigation }) {
   async function load() {
     try {
       setLoading(true);
-      const { items } = await listSalesReceipts({ search });
+      const { items } = await listSalesInvoices({ search });
       setItems(items);
     } catch (e) {
-      console.log("Erro ao carregar recibos:", e);
+      console.log("Erro ao carregar faturas:", e);
     } finally {
       setLoading(false);
     }
@@ -46,7 +45,9 @@ export default function FaturasReciboScreen({ navigation }) {
     return (
       <TouchableOpacity
         style={s.card}
-        onPress={() => navigation.navigate("ReceiptDetail", { id: item.id })}
+        onPress={() =>
+          navigation.navigate("InvoiceDetail", { id: item.id })
+        }
       >
         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
           <Text style={s.number}>{item.number}</Text>
@@ -67,7 +68,7 @@ export default function FaturasReciboScreen({ navigation }) {
     <View style={s.container}>
       <DrawerMenuIcon />
 
-      <Text style={s.title}>Faturas Recibo</Text>
+      <Text style={s.title}>Faturas</Text>
 
       <TextInput
         style={s.search}
@@ -93,6 +94,13 @@ export default function FaturasReciboScreen({ navigation }) {
           }
         />
       )}
+
+      <TouchableOpacity
+        style={s.addBtn}
+        onPress={() => navigation.navigate("InvoiceCreate")}
+      >
+        <Text style={s.addTxt}>+ Criar Fatura</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -128,8 +136,7 @@ const s = StyleSheet.create({
 
   number: { color: "#e7d7c3", fontWeight: "700", fontSize: 16 },
   status: { color: "#7ee081", fontWeight: "700" },
-
-  client: { color: "#fff", marginTop: 4, marginBottom: 8 },
+  client: { color: "#fff", marginTop: 4, marginBottom: 10 },
 
   row: {
     flexDirection: "row",
@@ -140,4 +147,17 @@ const s = StyleSheet.create({
   total: { color: "#ffcc66", fontWeight: "800" },
 
   center: { justifyContent: "center", alignItems: "center", flex: 1 },
+
+  addBtn: {
+    backgroundColor: "#7ee081",
+    padding: 14,
+    borderRadius: 10,
+    marginTop: 10,
+  },
+  addTxt: {
+    color: "#000",
+    textAlign: "center",
+    fontWeight: "800",
+    fontSize: 16,
+  },
 });

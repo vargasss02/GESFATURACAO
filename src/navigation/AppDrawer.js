@@ -5,15 +5,18 @@ import CustomDrawerContent from "../components/CustomDrawerContent";
 // STACKS
 import ArtigosStack from "./stacks/ArtigosStack";
 import ClientsStack from "./stacks/ClientsStack";
-import FaturasStack from "./stacks/FaturasStack";
 import OrcamentosStack from "./stacks/OrcamentosStack";
+import SalesInvoicesStack from "./stacks/SalesInvoicesStack"; // ✅ NOVO
 
-// SCREENS (soltas)
+// SCREENS soltas
 import DashboardScreen from "../screens/DashboardScreen";
 import DefinicoesScreen from "../screens/DefinicoesScreen";
 import GuiasTransporteScreen from "../screens/Transporte/GuiasTransporteScreen";
 import FaturasReciboScreen from "../screens/Vendas/FaturasReciboScreen";
-import { default as FaturasSimplificadasScreen, default as NotasDebitoScreen } from "../screens/Vendas/FaturasSimplificadasScreen";
+import {
+  default as FaturasSimplificadasScreen,
+  default as NotasDebitoScreen,
+} from "../screens/Vendas/FaturasSimplificadasScreen";
 import NotasCreditoScreen from "../screens/Vendas/NotasCreditoScreen";
 import RecibosScreen from "../screens/Vendas/RecibosScreen";
 
@@ -56,12 +59,16 @@ export default function AppDrawer() {
         options={{ drawerLabel: "Guias de Transporte" }}
       />
 
+      {/* --------------------------------------------- */}
+      {/* NOVO MÓDULO OFICIAL DE FATURAS (sales/invoices) */}
+      {/* --------------------------------------------- */}
       <Drawer.Screen
-        name="Faturas"
-        component={FaturasStack}
-        options={{ drawerLabel: "Faturas" }}
+        name="SalesInvoices"
+        component={SalesInvoicesStack}
+        options={{ drawerLabel: "Faturas (Venda)" }}
       />
 
+      {/* RESTO – módulos antigos sociais */}
       <Drawer.Screen
         name="FaturasSimplificadas"
         component={FaturasSimplificadasScreen}
@@ -92,7 +99,6 @@ export default function AppDrawer() {
         options={{ drawerLabel: "Notas de Débito" }}
       />
 
-      {/* Artigos agora é uma Stack (lista + detalhe) */}
       <Drawer.Screen
         name="Artigos"
         component={ArtigosStack}
